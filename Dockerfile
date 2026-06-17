@@ -12,4 +12,5 @@ RUN mvn clean package -DskipTests
 
 EXPOSE 8085
 
-CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]
+# ✅ COMANDO COM MAIS VERBOSIDADE PARA VER ERRO
+CMD ["java", "-jar", "-Dspring.profiles.active=prod", "target/backend-0.0.1-SNAPSHOT.jar"]
