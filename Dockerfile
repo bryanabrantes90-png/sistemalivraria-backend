@@ -1,24 +1,24 @@
-# Usando imagem válida e existente
-FROM openjdk:22-jdk-slim
+# Imagem válida e existente (resolvendo o erro anterior)
+FROM eclipse-temurin:22-jdk-jammy
 
 # Define pasta de trabalho
 WORKDIR /app
 
-# Copia o arquivo pom.xml e código
+# Copia arquivos do projeto
 COPY pom.xml .
 COPY src ./src
 
-# Instala o Maven dentro da imagem
+# Instala o Maven
 RUN apt-get update && apt-get install -y maven
 
-# Compila o projeto
+# Compila o projeto, ignorando testes
 RUN mvn clean install -DskipTests
 
-# Copia o arquivo .jar gerado
+# Copia o arquivo executável gerado
 COPY target/*.jar app.jar
 
-# Porta que sua aplicação usa
+# Porta que a aplicação usa
 EXPOSE 8085
 
-# Comando para rodar
+# Comando para iniciar
 CMD ["java", "-jar", "app.jar"]
