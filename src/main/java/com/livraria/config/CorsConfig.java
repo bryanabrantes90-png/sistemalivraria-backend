@@ -13,16 +13,18 @@ public class CorsConfig {
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins(
-                            "http://localhost:5173", // acesso local
-                            "https://sistemalivraria-b.vercel.app", // seu endereço na Vercel
-                            "https://sistemalivraria-b.railway.app"  // se colocar no Railway
-                        )
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                        .allowedHeaders("*");
-            }
-        };    }
+        @Override
+public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/api/**")
+            .allowedOrigins(
+                "http://localhost:5173",
+                "https://sistemalivraria-b.vercel.app",
+                "https://sistemalivraria-b.railway.app",
+                "https://sistemalivraria-backend.onrender.com" // <-- SEU ENDEREÇO DO RENDER
+            )
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("*");
+}
+        };
+    }
 }

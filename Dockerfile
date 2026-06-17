@@ -1,16 +1,21 @@
+# Imagem válida e compatível
 FROM eclipse-temurin:22-jdk-jammy
 
+# Define pasta de trabalho
 WORKDIR /app
 
-COPY pom.xml .
+# Instala o Maven primeiro
 RUN apt-get update && apt-get install -y maven
-RUN mvn dependency:go-offline -B
 
+# Copia arquivos
+COPY pom.xml .
 COPY src ./src
 
+# Compila o projeto
 RUN mvn clean package -DskipTests
 
-EXPOSE 8085
+# Porta que o Render espera
+EXPOSE 10000
 
-# ✅ COMANDO COM MAIS VERBOSIDADE PARA VER ERRO
-CMD ["java", "-jar", "-Dspring.profiles.active=prod", "target/backend-0.0.1-SNAPSHOT.jar"]
+# Comando de inicialização (com variáveis garantidas)
+CMD ["java", "-jar", "-Dserver.port=10000", "target/backend-0.0.1-SNAPSHOT.jar"]
