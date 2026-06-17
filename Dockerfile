@@ -1,16 +1,24 @@
-FROM ubuntu:latest AS build
+# Usando imagem válida e existente
+FROM openjdk:22-jdk-slim
 
-RUN apt-get update
-RUN apt-get install openjdk-22.0.2-jdk -y
-COPY . .
+# Define pasta de trabalho
+WORKDIR /app
 
-RUN apt-get install maven -y
-RUN mvn clean install 
+# Copia o arquivo pom.xml e código
+COPY pom.xml .
+COPY src ./src
 
-FROM openjdk:22.0.2-jdk-slim
+# Instala o Maven dentro da imagem
+RUN apt-get update && apt-get install -y maven
 
+# Compila o projeto
+RUN mvn clean install -DskipTests
+
+# Copia o arquivo .jar gerado
+COPY target/*.jar app.jar
+
+# Porta que sua aplicação usa
 EXPOSE 8085
 
-COPY --from=build /target/deploy_render-1.0.0.jar app.jar
-
-ENTRYPOINT [ "java", "-jar", "app.jar" ]
+# Comando para rodar
+CMD ["java", "-jar", "app.jar"]
