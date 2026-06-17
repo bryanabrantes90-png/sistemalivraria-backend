@@ -1,24 +1,26 @@
-# Imagem válida e existente (resolvendo o erro anterior)
+# Imagem oficial, existente e compatível com Java 22
 FROM eclipse-temurin:22-jdk-jammy
 
-# Define pasta de trabalho
+# Define a pasta de trabalho
 WORKDIR /app
 
-# Copia arquivos do projeto
+# 🔹 Copia primeiro o pom.xml para aproveitar cache do Docker
 COPY pom.xml .
-COPY src ./src
 
-# Instala o Maven
+# 🔹 Instala o Maven (obrigatório na imagem slim)
 RUN apt-get update && apt-get install -y maven
 
-# Compila o projeto, ignorando testes
-RUN mvn clean install -DskipTests
+# 🔹 Baixa dependências (separado para cache)
+RUN mvn dependency:go-offline -B
 
-# Copia o arquivo executável gerado
-COPY target/*.jar app.jar
+# 🔹 Copia o código fonte
+COPY src ./src
 
-# Porta que a aplicação usa
+# 🔹 Compila o projeto, ignorando testes
+RUN mvn clean package -DskipTests
+
+# 🔹 Porta que o Railway usa automaticamente
 EXPOSE 8085
 
-# Comando para iniciar
-CMD ["java", "-jar", "app.jar"]
+# 🔹 Comando de inicialização CORRETO
+CMD ["java", "-jar", "target/sistemalivraria-backend-0.0.1-SNAPSHOT.jar"]
