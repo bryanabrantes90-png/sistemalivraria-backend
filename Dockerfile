@@ -1,16 +1,14 @@
-FROM ubuntu:latest AS build
+FROM maven:3.9-eclipse-temurin-22 AS build
 
-RUN apt-get update
-RUN apt-get install openjdk-22-jdk -y
-COPY . .
+WORKDIR /app
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+COPY src ./src
+RUN mvn clean package -DskipTests -B
 
-RUN apt-get install maven -y
-RUN mvn clean install
+FROM eclipse-temurin:22-jre
 
-FROM openjdk:22-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
-EXPOSE 8085
-
-COPY --from=build /target/deploy_render-1.0.0.jar app.jar
-
-ENTRYPOINT [ "java", "-jar", "app.jar" ]
+ENTRYPOINT ["java", "-jar", "app.jar"]
