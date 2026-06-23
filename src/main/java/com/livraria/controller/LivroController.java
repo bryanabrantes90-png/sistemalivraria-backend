@@ -2,6 +2,7 @@ package com.livraria.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,22 +14,27 @@ import com.livraria.model.Livro;
 import com.livraria.repository.LivroRepository;
 
 @RestController
-@RequestMapping("/api/livros")
+@RequestMapping("/livros")
 public class LivroController {
 
-    private final LivroRepository livroRepository;
+    private final LivroRepository repository;
 
-    public LivroController(LivroRepository livroRepository) {
-        this.livroRepository = livroRepository;
-    }
-
-    @PostMapping
-    public ResponseEntity<Livro> cadastrar(@RequestBody Livro livro) {
-        return ResponseEntity.ok(livroRepository.save(livro));
+    public LivroController(LivroRepository repository) {
+        this.repository = repository;
     }
 
     @GetMapping
-    public List<Livro> listar() {
-        return livroRepository.findAll();
+    public List<Livro> listarTodos() {
+        return repository.findAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<?> criar(@RequestBody Livro livro) {
+        try {
+            Livro salvo = repository.save(livro);
+            return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Erro ao salvar: " + e.getMessage());
+        }
     }
 }
