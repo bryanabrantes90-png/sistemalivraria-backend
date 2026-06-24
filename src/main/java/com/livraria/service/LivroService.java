@@ -1,69 +1,56 @@
 package com.livraria.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.livraria.dto.LivroDTO;
 import com.livraria.model.Livro;
 import com.livraria.repository.LivroRepository;
 
 @Service
 public class LivroService {
 
-    @Autowired
-    private LivroRepository livroRepository;
+    private final LivroRepository livroRepository;
 
-    private LivroDTO converterParaDTO(Livro livro) {
-        LivroDTO dto = new LivroDTO();
-        dto.setId(livro.getId());
-        dto.setTitulo(livro.getTitulo());
-        dto.setAutor(livro.getAutor());
-        dto.setPreco(livro.getPreco());
-        dto.setQuantidadeEstoque(livro.getQuantidadeEstoque());
-        dto.setNomeImagem(livro.getNomeImagem());
-        dto.setDescricao(livro.getDescricao());
-        dto.setIsbn(livro.getIsbn());
-        return dto;
+    // Injeção de dependência via construtor
+    public LivroService(LivroRepository livroRepository) {
+        this.livroRepository = livroRepository;
     }
 
-    public List<LivroDTO> listarTodos() {
-        return livroRepository.findAll()
-                .stream()
-                .map(this::converterParaDTO)
-                .collect(Collectors.toList());
+    // Listar todos os livros
+    public List<Livro> listarTodos() {
+        return livroRepository.findAll();
     }
 
-    public LivroDTO buscarPorId(Long id) {
-        Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
-        return converterParaDTO(livro);
+    // Buscar livro por ID
+    public Optional<Livro> buscarPorId(Long id) {
+        return livroRepository.findById(id);
     }
 
-    public Livro cadastrar(Livro livro) {
+    // Salvar novo livro
+    public Livro salvar(Livro livro) {
         return livroRepository.save(livro);
     }
 
-    public LivroDTO atualizar(Long id, Livro dadosAtualizados) {
-        Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
-
-        livro.setTitulo(dadosAtualizados.getTitulo());
-        livro.setAutor(dadosAtualizados.getAutor());
-        livro.setPreco(dadosAtualizados.getPreco());
-        livro.setQuantidadeEstoque(dadosAtualizados.getQuantidadeEstoque());
-        livro.setNomeImagem(dadosAtualizados.getNomeImagem());
-        livro.setDescricao(dadosAtualizados.getDescricao());
-        livro.setIsbn(dadosAtualizados.getIsbn());
-
-        return converterParaDTO(livroRepository.save(livro));
+    // Atualizar livro existente
+    public Livro atualizar(Long id, Livro livroAtualizado) {
+        return livroRepository.findById(id)
+                .map(livro -> {
+                    livro.setTitulo(livroAtualizado.getTitulo());
+                    livro.setDescricao(livroAtualizado.getDescricao());
+                    livro.setPreco(livroAtualizado.getPreco());
+                    livro.setAutorId(livroAtualizado.getAutorId());
+                    livro.setCategoriaId(livroAtualizado.getCategoriaId());
+                    return livroRepository.save(livro);
+                })
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
     }
 
+    // Excluir livro
     public void excluir(Long id) {
         if (!livroRepository.existsById(id)) {
-            throw new RuntimeException("Livro não encontrado");
+            throw new RuntimeException("Livro não encontrado com o ID: " + id);
         }
         livroRepository.deleteById(id);
     }

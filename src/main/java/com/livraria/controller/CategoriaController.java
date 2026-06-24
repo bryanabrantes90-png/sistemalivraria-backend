@@ -38,10 +38,10 @@ public class CategoriaController {
     @PutMapping("/{id}")
     public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoriaAtualizada) {
         return repository.findById(id)
-                .map(cat -> {
-                    cat.setNome(categoriaAtualizada.getNome());
-                    cat.setDescricao(categoriaAtualizada.getDescricao());
-                    return ResponseEntity.ok(repository.save(cat));
+                .map(categoria -> {
+                    categoria.setNome(categoriaAtualizada.getNome());
+                    categoria.setDescricao(categoriaAtualizada.getDescricao());
+                    return ResponseEntity.ok(repository.save(categoria));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

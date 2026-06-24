@@ -16,7 +16,7 @@ import com.livraria.model.Autor;
 import com.livraria.repository.AutorRepository;
 
 @RestController
-@RequestMapping("/autores") // ← Caminho principal da rota
+@RequestMapping("/autores")
 public class AutorController {
 
     private final AutorRepository repository;

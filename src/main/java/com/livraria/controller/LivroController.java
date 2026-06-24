@@ -2,6 +2,7 @@ package com.livraria.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,50 +14,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.livraria.model.Livro;
-import com.livraria.repository.LivroRepository;
+import com.livraria.service.LivroService;
 
 @RestController
 @RequestMapping("/livros")
 public class LivroController {
 
-    private final LivroRepository repository;
+    private final LivroService livroService;
 
-    public LivroController(LivroRepository repository) {
-        this.repository = repository;
+    public LivroController(LivroService livroService) {
+        this.livroService = livroService;
     }
 
     @GetMapping
     public List<Livro> listarTodos() {
-        return repository.findAll();
+        return livroService.listarTodos();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
+        return livroService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public Livro criar(@RequestBody Livro livro) {
-        return repository.save(livro);
+    public ResponseEntity<Livro> criar(@RequestBody Livro livro) {
+        Livro salvo = livroService.salvar(livro);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Livro> atualizar(@PathVariable Long id, @RequestBody Livro livroAtualizado) {
-        return repository.findById(id)
-                .map(livro -> extracted(livroAtualizado, livro))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    private ResponseEntity<Livro> extracted(Livro livroAtualizado, Livro livro) {
-        livro.setTitulo(livroAtualizado.getTitulo());
-        livro.setDescricao(livroAtualizado.getDescricao());
-        livro.setPreco(livroAtualizado.getPreco());
-        livro.setAutor((String) livroAtualizado.getAutorId());
-        livro.setCategoriaId(livroAtualizado.getCategoriaId());
-        return ResponseEntity.ok(repository.save(livro));
+        try {
+            Livro atualizado = livroService.atualizar(id, livroAtualizado);
+            return ResponseEntity.ok(atualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        if (!repository.existsById(id)) {
+        try {
+            livroService.excluir(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
-        repository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }
