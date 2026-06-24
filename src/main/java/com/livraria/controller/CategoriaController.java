@@ -26,7 +26,7 @@ public class CategoriaController {
     }
 
     @GetMapping
-    public List<Categoria> listar() {
+    public List<Categoria> listarTodos() {
         return repository.findAll();
     }
 
@@ -36,17 +36,21 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
-        return repository.findById(id).map(c -> {
-            c.setNome(categoria.getNome());
-            c.setDescricao(categoria.getDescricao());
-            return ResponseEntity.ok(repository.save(c));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoriaAtualizada) {
+        return repository.findById(id)
+                .map(cat -> {
+                    cat.setNome(categoriaAtualizada.getNome());
+                    cat.setDescricao(categoriaAtualizada.getDescricao());
+                    return ResponseEntity.ok(repository.save(cat));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

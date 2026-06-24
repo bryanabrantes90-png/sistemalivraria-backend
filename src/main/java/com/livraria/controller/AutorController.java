@@ -16,7 +16,7 @@ import com.livraria.model.Autor;
 import com.livraria.repository.AutorRepository;
 
 @RestController
-@RequestMapping("/autores")
+@RequestMapping("/autores") // ← Caminho principal da rota
 public class AutorController {
 
     private final AutorRepository repository;
@@ -26,7 +26,7 @@ public class AutorController {
     }
 
     @GetMapping
-    public List<Autor> listar() {
+    public List<Autor> listarTodos() {
         return repository.findAll();
     }
 
@@ -36,18 +36,22 @@ public class AutorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Autor> atualizar(@PathVariable Long id, @RequestBody Autor autor) {
-        return repository.findById(id).map(a -> {
-            a.setNome(autor.getNome());
-            a.setNacionalidade(autor.getNacionalidade());
-            a.setBiografia(autor.getBiografia());
-            return ResponseEntity.ok(repository.save(a));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Autor> atualizar(@PathVariable Long id, @RequestBody Autor autorAtualizado) {
+        return repository.findById(id)
+                .map(autor -> {
+                    autor.setNome(autorAtualizado.getNome());
+                    autor.setNacionalidade(autorAtualizado.getNacionalidade());
+                    autor.setBiografia(autorAtualizado.getBiografia());
+                    return ResponseEntity.ok(repository.save(autor));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
